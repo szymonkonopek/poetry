@@ -1,0 +1,16 @@
+FROM python:3.12-bookworm AS backend-dev
+
+WORKDIR /app
+COPY ci ci
+RUN ls
+RUN echo $PWD
+RUN pip install -r ci/requirements.txt
+COPY backend backend
+EXPOSE 8000
+ENTRYPOINT ["python","/app/backend/manage.py", "runserver","--insecure", "8000" ]
+
+
+#FROM ubuntu:latest
+# LABEL authors="szymon"
+
+# ENTRYPOINT [ "top", "-b"]
