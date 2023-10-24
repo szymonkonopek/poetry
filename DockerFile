@@ -1,14 +1,38 @@
 FROM python:3.12-bookworm AS backend-dev
 
 WORKDIR /app
+
 COPY ci ci
-RUN ls
+ARG APT_LIB_DIR=/var/lib/apt
+ARG APT_CACHE_DIR=/var/cache/apt
+COPY ./backend .
+
+
+# RUN --mount=type=cache, target=$APT_CACHE_DIR, sharing=locked \
+#     --mount=type=cache, target=$APT_LIB_DIR, sharing=locked \
+#     rm -f /etc/apt/apt.conf.d/docker-clean; \
+#     echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' > /etc/apt/apt.conf.d/keep-cache && \
+#     apt-get update && apt install tree
+
+RUN --mount=type=cache,target=$APT_CACHE_DIR,sharing=locked \
+    --mount=type=cache,target=$APT_LIB_DIR,sharing=locked \
+    rm -f /etc/apt/apt.conf.d/docker-clean; \
+    echo 'Binary::apt::APT::Keep-Downloaded-Package "true";' > /etc/apt/apt.conf.d/keep-cache && \
+    apt-get update && apt install tree
+
+ARG PIP_CACHE_DIR=/var/cache/pip
+COPY ci/requirements.txt ci/requirements.txt
+
+#COPY ci ci
+#RUN ls
 RUN echo $PWD
 RUN pip install -r ci/requirements.txt
-COPY backend backend
-EXPOSE 8000
+#COPY backend .
+#EXPOSE 8000
 ENTRYPOINT ["python","/app/backend/manage.py", "runserver","--insecure", "8000" ]
 
+
+#POSTGRES https://hub.docker.com/_/postgres
 
 #FROM ubuntu:latest
 # LABEL authors="szymon"

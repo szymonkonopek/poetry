@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: ci/dockerfiles/backend-dev.Dockerfile
+    image: &local_build local_app:latest
+    deploy:
+      replicas: 8
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        restart_policy:
+          condition: on-failure
+  db:
+    image: postgres:15
